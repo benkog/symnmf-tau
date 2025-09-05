@@ -69,3 +69,18 @@ double* get_datapoints(char* path, int N, int d)
 
     return datapoints;
 }
+
+void print_matrix(double* mat, int N, int d)
+{
+    int i, j;
+
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < d; j++) {
+            printf("%.4f", mat[i * d + j]);
+            if (j < d - 1) {
+                printf(",");
+            }
+        }
+        printf("\n");
+    }
+}

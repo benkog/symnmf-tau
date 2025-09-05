@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "utils.h"
 
 int main(int argc, char **argv) {
@@ -6,6 +7,7 @@ int main(int argc, char **argv) {
     char* goal;
     char* path;
     int N, d;
+    double* datapoints;
 
     if(argc != 3) {
         printf("An Error Has Occurred");
@@ -26,5 +28,8 @@ int main(int argc, char **argv) {
     printf("N: %d\n", N);
     printf("d: %d\n", d);
 
+    datapoints = get_datapoints(path, N, d);
+    print_matrix(datapoints, N, d);
+    free(datapoints);
     return 0;
 }
