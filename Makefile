@@ -1,13 +1,16 @@
 CC = gcc
 CFLAGS = -ansi -Wall -Wextra -Werror -pedantic-errors
-
+OBJECTS = symnmf.o utils.o
 TARGET = symnmf
-SRC = symnmf.c
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS)
+
+# Compile .c files to .o files
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(OBJECTS)
