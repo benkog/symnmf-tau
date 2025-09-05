@@ -1,9 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "util.h"
 
 int get_datapoints_dimensions(char* path, int* N, int* d)
 {
-    FILE *file;
+    FILE* file;
     int num_of_commas = 0, num_of_rows = 0, last_char;
     int curr_char;
 
@@ -38,4 +39,33 @@ int get_datapoints_dimensions(char* path, int* N, int* d)
 
     fclose(file);
     return 0;
+}
+
+double* get_datapoints(char* path, int N, int d)
+{
+    double* datapoints;
+    FILE* file;
+    int i, j;
+
+    datapoints = malloc(N * d * sizeof(double));
+    if (datapoints == NULL) {
+        printf("An Error Has Occurred");
+        return NULL;
+    }
+
+    file = fopen(path, "r");
+    if (!file) {
+        printf("An Error Has Occurred");
+        free(datapoints);
+        return NULL;
+    }
+
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < d; j++) {
+            fscanf(file, "%lf", &datapoints[i * d + j]);
+            fgetc(file);
+        }
+    }
+
+    return datapoints;
 }
