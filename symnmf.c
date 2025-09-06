@@ -7,7 +7,7 @@ double* get_sym_matrix(double* datapoints, int N, int d)
 {
     int i, j;
     double euc_distance, sym_value;
-    double* A;
+    double *A;
 
     A = malloc(N * N * sizeof(double));
     if (A == NULL) {
@@ -31,13 +31,62 @@ double* get_sym_matrix(double* datapoints, int N, int d)
     return A;
 }
 
+double* get_ddg_matrix(double* sym_matrix, int N)
+{
+    int i, j;
+    double edge_sum = 0;
+    double *D;
+
+    /* Initialize the D matrix with zeros */
+    D = calloc(N * N, sizeof(double));
+    if (D == NULL) {
+        printf("An Error Has Occurred");
+        return NULL;
+    }
+
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+            edge_sum += sym_matrix[i * N + j];
+        }
+        D[i * N + i] = edge_sum;
+        edge_sum = 0;
+    }
+
+    return D;
+}
+
+double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
+{
+    double *W, *tmp_mat;
+
+    W = calloc(N * N, sizeof(double));
+    if (W == NULL) {
+        printf("An Error Has Occurred");
+        return NULL;
+    }
+
+    diag_matrix_pow(ddg_matrix, N, -0.5);
+    tmp_mat = mult_sqr_mats(ddg_matrix, sym_matrix, N); /* Compute D^{-0.5}_A */
+    if (tmp_mat == NULL) {
+        return NULL;
+    }
+    W = mult_sqr_mats(tmp_mat, ddg_matrix, N); /* Compute D^{-0.5}_A_D^{-0.5} */
+    if (W == NULL) {
+        free(tmp_mat);
+        return NULL;
+    }
+
+    free(tmp_mat);
+    return W;
+}
+
 int main(int argc, char **argv) 
 {
     
     char* goal;
     char* path;
     int N, d;
-    double* datapoints, *A;
+    double* datapoints, *A, *D, *W;
 
     if(argc != 3) {
         printf("An Error Has Occurred");
@@ -64,7 +113,15 @@ int main(int argc, char **argv)
     A = get_sym_matrix(datapoints, N, d);
     printf("A matrix:\n");
     print_matrix(A, N, N);
+    D = get_ddg_matrix(A, N);
+    printf("D matrix:\n");
+    print_matrix(D, N, N);
+    printf("D matrix:\n");
+    W = get_norm_matrix(A, D, N);
+    print_matrix(W, N, N);
     free(datapoints);
     free(A);
+    free(D);
+    free(W);
     return 0;
 }

@@ -5,7 +5,7 @@
 
 int get_datapoints_dimensions(char* path, int* N, int* d)
 {
-    FILE* file;
+    FILE *file;
     int num_of_commas = 0, num_of_rows = 0, last_char;
     int curr_char;
 
@@ -44,8 +44,8 @@ int get_datapoints_dimensions(char* path, int* N, int* d)
 
 double* get_datapoints(char* path, int N, int d)
 {
-    double* datapoints;
-    FILE* file;
+    double *datapoints;
+    FILE *file;
     int i, j;
 
     datapoints = malloc(N * d * sizeof(double));
@@ -97,4 +97,35 @@ double get_euc_distance(double* vec1, double* vec2, int d)
     }
 
     return distance;
+}
+
+void diag_matrix_pow(double* mat, int N, double exp)
+{
+    int i;
+
+    for (i = 0; i < N; i++) {
+        mat[i * N + i] = pow(mat[i * N + i], exp);
+    }
+}
+
+double* mult_sqr_mats(double* mat1, double* mat2, int N)
+{
+    int i, j, k;
+    double *res; /* The result of the matrix multiplication */
+
+    res = calloc(N * N, sizeof(double));
+    if (res == NULL) {
+        printf("An Error Has Occurred");
+        return NULL;
+    }
+
+    for (i = 0; i < N; i++) {
+        for (j = 0; j < N; j++) {
+            for (k = 0; k < N; k++) {
+                res[i * N + j] += mat1[i * N + k] * mat2[k * N + j];
+            }
+        }
+    }
+
+    return res;
 }
