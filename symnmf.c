@@ -18,7 +18,7 @@ double* get_sym_matrix(double* datapoints, int N, int d)
 {
     int i, j;
     double euc_distance, sym_value;
-    double *A;
+    double *A; /* The similarity matrix to be calculated */
 
     A = malloc(N * N * sizeof(double));
     if (A == NULL || datapoints == NULL) {
@@ -46,7 +46,7 @@ double* get_ddg_matrix(double* sym_matrix, int N)
 {
     int i, j;
     double edge_sum = 0;
-    double *D;
+    double *D; /* The diagonal degree matrix to be calculated */
 
     D = malloc(N * N * sizeof(double));
     if (D == NULL || sym_matrix == NULL) {
@@ -67,19 +67,23 @@ double* get_ddg_matrix(double* sym_matrix, int N)
 
 double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
 {
-    double *W, *tmp_mat;
+    double *W; /* The normalized similarity matrix to be calculated */
+    double *tmp_mat, *ddg_matrix_cpy;
 
     W = malloc(N * N * sizeof(double));
     tmp_mat = malloc(N * N * sizeof(double));
+    ddg_matrix_cpy = malloc(N * N * sizeof(double));
 
-    if (W == NULL || tmp_mat == NULL || sym_matrix == NULL || ddg_matrix == NULL) {
-        free(W); free(tmp_mat);
+    if (W == NULL || tmp_mat == NULL || sym_matrix == NULL || ddg_matrix == NULL || ddg_matrix_cpy == NULL) {
+        free(W); free(tmp_mat); free(ddg_matrix_cpy);
         return NULL;
     }
 
-    diag_matrix_pow(ddg_matrix, N, -0.5); /* D^{-0.5} */
-    mult_sqr_mats(ddg_matrix, sym_matrix, tmp_mat, N); /* D^{-0.5} * A */
-    mult_sqr_mats(tmp_mat, ddg_matrix, W, N); /* D^{-0.5} * A * D^{-0.5} */
+    memcpy(ddg_matrix_cpy, ddg_matrix, N * N * sizeof(double)); /* Making a copy to not cause side-effects */
+
+    diag_matrix_pow(ddg_matrix_cpy, N, -0.5); 
+    mult_sqr_mats(ddg_matrix, sym_matrix, tmp_mat, N); 
+    mult_sqr_mats(tmp_mat, ddg_matrix, W, N); 
 
     free(tmp_mat);
     return W;
@@ -88,10 +92,16 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
 double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, int k)
 {   
     /*
-    * TODO: add comments explainig the variables.
+    * H         - initial H matrix (copied from argument to avoid side-effects)
+    * H_next    - stores the result of current iteration
+    * H_T       - H transposed
+    * W         - normalized similarity matrix
+    * HH_T      - (H transposed) * H
+    * HH_TH     - H * (H transpoed) * H
+    * WH        - W * H
     */
     double *H, *H_next, *H_T, *HH_T, *HH_TH, *WH, *tmp, *W = norm_matrix, beta = 0.5, eps = 1e-4;
-    int i, j, index, val, max_iter = 300, curr_iter = 0;
+    int i, j, index, max_iter = 300, curr_iter = 0;
 
     H = malloc(N * k * sizeof(double));
     H_next = malloc(N * k * sizeof(double));
@@ -100,8 +110,8 @@ double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, 
     HH_TH = malloc(N * k * sizeof(double));
     WH = malloc(N * k * sizeof(double));
 
-    if (H_next == NULL || H_T == NULL || HH_T == NULL || HH_TH == NULL || WH == NULL || initial_H_matrix == NULL || norm_matrix == NULL) {
-        free(H_next); free(H_T); free(HH_T); free(HH_TH); free(WH);
+    if (H == NULL || H_next == NULL || H_T == NULL || HH_T == NULL || HH_TH == NULL || WH == NULL || initial_H_matrix == NULL || norm_matrix == NULL) {
+        free(H); free(H_next); free(H_T); free(HH_T); free(HH_TH); free(WH);
         return NULL;
     }
 
@@ -113,15 +123,17 @@ double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, 
         mult_mats(HH_T, H, HH_TH, N, N, k);
         mult_mats(W, H, WH, N, N, k);
 
+        /* Calculate each element of H_next according to the formula, 
+           if the divisor is equal to zero replacing it with 1e-6 */
         for (i = 0; i < N; i++) {
             for (j = 0; j < k; j++) {
                 index = i * k + j;
-                val = H[index] * (1 - beta + beta * (WH[index] / ((HH_TH == 0) ? 1e-6 : HH_TH[index])));
-                H_next[index] = val;
+                H_next[index] = H[index] * (1 - beta + beta * (WH[index] / ((HH_TH == 0) ? 1e-6 : HH_TH[index])));
             }
         }
 
-        /* Swap the pointers so H points to H_next for next iteration */
+        /* Swap the pointers so H points to H_next and vice versa for next iteration,
+           then H_next can be safely overwritten */
         tmp = H;
         H = H_next;
         H_next = tmp;
@@ -130,27 +142,6 @@ double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, 
     
     free(H_next); free(H_T); free(HH_T); free(HH_TH); free(WH);
     return H;
-}
-
-int print_goal(char* path, goal goal, double* datapoints, double* sym_matrix, double* ddg_matrix, double* norm_matrix)
-{
-    int N, d;
-
-    if (get_datapoints_dimensions(path, &N, &d) != 0) {
-        return -1;
-    }
-
-    datapoints = get_datapoints(path, N, d);
-    sym_matrix = get_sym_matrix(datapoints, N, d);
-    if (goal == sym_a) return print_matrix(sym_matrix, N, N);
-    
-    ddg_matrix = get_ddg_matrix(sym_matrix, N);
-    if (goal == ddg_a) return print_matrix(ddg_matrix, N, N);
-
-    norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
-    if (goal == norm_a) return print_matrix(norm_matrix, N, N);
-
-    return -1;
 }
 
 double* sym(double* datapoints, int N, int d)
@@ -198,7 +189,7 @@ double* symnmf(double* datapoints, double* H, int N, int d, int k)
     return symnmf_matrix;
 }
 
-int print_matrix_from_func(double* (*func)(char*, int*, int*), double* datapoints, int N, int d)
+int print_matrix_from_func(double* (*func)(double*, int, int), double* datapoints, int N, int d)
 {
     int status;
     double* matrix;
@@ -214,8 +205,6 @@ int print_goal_matrix(goal goal, double* datapoints, int N, int d)
 {
     int status;
 
-    status = -1;
-
     switch (goal)
     {
         case sym_a:
@@ -226,6 +215,9 @@ int print_goal_matrix(goal goal, double* datapoints, int N, int d)
             break;
         case norm_a:
             status = print_matrix_from_func(norm, datapoints, N, d);
+            break;
+        default:
+            status = -1;
             break;
     }
 
