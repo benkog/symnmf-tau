@@ -114,6 +114,7 @@ void mult_mats(double* mat1, double* mat2, double* target, int mat1_rows, int ma
 
     for (i = 0; i < mat1_rows; i++) {
         for (j = 0; j < mat2_cols; j++) {
+            target[i * mat2_cols + j] = 0.0;
             for (k = 0; k < mat1_cols; k++) {
                 target[i * mat2_cols + j] += mat1[i * mat1_cols + k] * mat2[k * mat2_cols + j];
             }
@@ -124,4 +125,28 @@ void mult_mats(double* mat1, double* mat2, double* target, int mat1_rows, int ma
 void mult_sqr_mats(double* mat1, double* mat2, double* target, int N)
 {
     mult_mats(mat1, mat2, target, N, N, N);
+}
+
+double frobenius_norm_sqr_diff(double* mat1, double* mat2, int rows, int cols)
+{
+    int i;
+    double sum = 0.0, diff;
+
+    for (i = 0; i < rows * cols; i++) {
+        diff = mat1[i] - mat2[i];
+        sum += diff * diff;
+    }
+
+    return sum;
+}
+
+void transpose_mat(double* mat, double* target, int rows, int cols)
+{
+    int i, j;
+
+    for (i = 0; i < rows; ++i) {
+        for (j = 0; j < cols; ++j) {
+            target[j * rows + i] = mat[i * cols + j];
+        }
+    }
 }
