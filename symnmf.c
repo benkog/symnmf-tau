@@ -100,8 +100,7 @@ double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, 
     HH_TH = malloc(N * k * sizeof(double));
     WH = malloc(N * k * sizeof(double));
 
-    if (H_next == NULL || H_T == NULL || HH_T == NULL || HH_TH == NULL || WH == NULL) {
-        printf("An Error Has Occurred");
+    if (H_next == NULL || H_T == NULL || HH_T == NULL || HH_TH == NULL || WH == NULL || initial_H_matrix == NULL || norm_matrix == NULL) {
         free(H_next); free(H_T); free(HH_T); free(HH_TH); free(WH);
         return NULL;
     }
@@ -154,58 +153,64 @@ int print_goal(char* path, goal goal, double* datapoints, double* sym_matrix, do
     return -1;
 }
 
-double* sym(char* path, int* N)
+double* sym(double* datapoints, int N, int d)
 {
-    int *d;
-    double *datapoints, *sym_matrix;
+    double *sym_matrix;
 
-    if (get_datapoints_dimensions(path, N, d) != 0) {
-        return NULL;
-    }
-
-    datapoints = get_datapoints(path, *N, *d);
-    sym_matrix = get_sym_matrix(datapoints, *N, *d);
-    free(datapoints);
+    sym_matrix = get_sym_matrix(datapoints, N, d);
 
     return sym_matrix;
 }
 
-double* ddg(char* path, int* N)
+double* ddg(double* datapoints, int N, int d)
 {
     double *sym_matrix, *ddg_matrix;
 
-    sym_matrix = sym(path, N);
-    ddg_matrix = get_ddg_matrix(sym_matrix, *N);
+    sym_matrix = get_sym_matrix(datapoints, N, d);
+    ddg_matrix = get_ddg_matrix(sym_matrix, N);
 
     free(sym_matrix);
     return ddg_matrix;
 }
 
-double* norm(char* path, int* N)
+double* norm(double* datapoints, int N, int d)
 {
     double *sym_matrix, *ddg_matrix, *norm_matrix;
 
-    sym_matrix = sym(path, N);
-    ddg_matrix = get_ddg_matrix(sym_matrix, *N);
-    norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, *N);
+    sym_matrix = get_sym_matrix(datapoints, N, d);
+    ddg_matrix = get_ddg_matrix(sym_matrix, N);
+    norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
 
     free(sym_matrix); free(ddg_matrix);
     return norm_matrix;
 }
 
-int print_matrix_by_func(double* (*func)(char*, int*), char* path)
+double* symnmf(double* datapoints, double* H, int N, int d, int k)
 {
-    int status, *N;
+    double *sym_matrix, *ddg_matrix, *norm_matrix, *symnmf_matrix;
+
+    sym_matrix = get_sym_matrix(datapoints, N, d);
+    ddg_matrix = get_ddg_matrix(sym_matrix, N);
+    norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
+    symnmf_matrix = get_symnmf_matrix(H, norm_matrix, N, k);
+
+    free(sym_matrix); free(ddg_matrix); free(norm_matrix);
+    return symnmf_matrix;
+}
+
+int print_matrix_from_func(double* (*func)(char*, int*, int*), double* datapoints, int N, int d)
+{
+    int status;
     double* matrix;
 
-    matrix = func(path, N);
-    status = print_matrix(matrix, *N, *N);
+    matrix = func(datapoints, N, d);
+    status = print_matrix(matrix, N, N);
     free(matrix);
 
     return status;
 }
 
-int pg(char* path, goal goal)
+int print_goal_matrix(goal goal, double* datapoints, int N, int d)
 {
     int status;
 
@@ -214,13 +219,13 @@ int pg(char* path, goal goal)
     switch (goal)
     {
         case sym_a:
-            status = print_matrix_by_func(sym, path);
+            status = print_matrix_from_func(sym, datapoints, N, d);
             break;
         case ddg_a:
-            status = print_matrix_by_func(ddg, path);
+            status = print_matrix_from_func(ddg, datapoints, N, d);
             break;
         case norm_a:
-            status = print_matrix_by_func(norm, path);
+            status = print_matrix_from_func(norm, datapoints, N, d);
             break;
     }
 
@@ -229,7 +234,8 @@ int pg(char* path, goal goal)
 
 int main(int argc, char **argv) 
 {
-    double *datapoints = NULL, *sym_matrix = NULL, *ddg_matrix = NULL, *norm_matrix = NULL;
+    int N, d;
+    double *datapoints;
     char* path;
     goal goal;
 
@@ -241,11 +247,18 @@ int main(int argc, char **argv)
     goal = get_goal_from_arg(argv[1]);
     path = argv[2];
 
-    if (print_goal(path, goal, datapoints, sym_matrix, ddg_matrix, norm_matrix) != 0) {
+    if (get_datapoints_dimensions(path, &N, &d) != 0) {
+        printf("An Error Has Occurred");
+        return -1;
+    }
+
+    datapoints = get_datapoints(path, N, d);
+
+    if (print_goal_matrix(goal, datapoints, N, d) != 0) {
         printf("An Error Has Occurred");
     }
 
-    free(datapoints); free(sym_matrix); free(ddg_matrix); free(norm_matrix);
+    free(datapoints);
 
     return 0;
 }
