@@ -65,19 +65,24 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
         return NULL;
     }
 
-    diag_matrix_pow(ddg_matrix, N, -0.5);
-    tmp_mat = mult_sqr_mats(ddg_matrix, sym_matrix, N); /* Compute D^{-0.5}_A */
+    tmp_mat = calloc(N * N, sizeof(double));
     if (tmp_mat == NULL) {
-        return NULL;
-    }
-    W = mult_sqr_mats(tmp_mat, ddg_matrix, N); /* Compute D^{-0.5}_A_D^{-0.5} */
-    if (W == NULL) {
-        free(tmp_mat);
+        printf("An Error Has Occurred");
+        free(W);
         return NULL;
     }
 
+    diag_matrix_pow(ddg_matrix, N, -0.5);
+    mult_sqr_mats(ddg_matrix, sym_matrix, tmp_mat, N); /* Compute D^{-0.5}_A */
+    mult_sqr_mats(tmp_mat, ddg_matrix, W, N); /* Compute D^{-0.5}_A_D^{-0.5} */
+
     free(tmp_mat);
     return W;
+}
+
+double* get_H_matrix(double* initial_H_matrix, double* norm_matrix, int N, int k)
+{
+    
 }
 
 int main(int argc, char **argv) 
