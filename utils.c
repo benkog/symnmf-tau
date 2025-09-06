@@ -50,13 +50,11 @@ double* get_datapoints(char* path, int N, int d)
 
     datapoints = malloc(N * d * sizeof(double));
     if (datapoints == NULL) {
-        printf("An Error Has Occurred");
         return NULL;
     }
 
     file = fopen(path, "r");
     if (!file) {
-        printf("An Error Has Occurred");
         free(datapoints);
         return NULL;
     }
@@ -71,9 +69,13 @@ double* get_datapoints(char* path, int N, int d)
     return datapoints;
 }
 
-void print_matrix(double* mat, int rows, int cols)
+int print_matrix(double* mat, int rows, int cols)
 {
     int i, j;
+
+    if (mat == NULL) {
+        return -1;
+    }
 
     for (i = 0; i < rows; i++) {
         for (j = 0; j < cols; j++) {
@@ -84,6 +86,8 @@ void print_matrix(double* mat, int rows, int cols)
         }
         printf("\n");
     }
+
+    return 0;
 }
 
 double get_euc_distance(double* vec1, double* vec2, int d)
@@ -148,5 +152,14 @@ void transpose_mat(double* mat, double* target, int rows, int cols)
         for (j = 0; j < cols; ++j) {
             target[j * rows + i] = mat[i * cols + j];
         }
+    }
+}
+
+void free_double_pointer_array(double *pointers[], int count)
+{
+    int i;
+
+    for (i = 0; i < count; i++) {
+        free(pointers[i]);
     }
 }

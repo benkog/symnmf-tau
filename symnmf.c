@@ -4,6 +4,16 @@
 #include <string.h>
 #include "utils.h"
 
+typedef enum { sym, ddg, norm, invalid } goal;
+
+goal get_goal_from_arg(char* arg)
+{
+    if (strcmp(arg, "sym") == 0) return sym;
+    if (strcmp(arg, "ddg") == 0) return ddg;
+    if (strcmp(arg, "norm") == 0) return norm;
+    return invalid;
+}
+
 double* get_sym_matrix(double* datapoints, int N, int d)
 {
     int i, j;
@@ -11,8 +21,8 @@ double* get_sym_matrix(double* datapoints, int N, int d)
     double *A;
 
     A = malloc(N * N * sizeof(double));
-    if (A == NULL) {
-        printf("An Error Has Occurred");
+    if (A == NULL || datapoints == NULL) {
+        free(A);
         return NULL;
     }
 
@@ -39,8 +49,8 @@ double* get_ddg_matrix(double* sym_matrix, int N)
     double *D;
 
     D = malloc(N * N * sizeof(double));
-    if (D == NULL) {
-        printf("An Error Has Occurred");
+    if (D == NULL || sym_matrix == NULL) {
+        free(D);
         return NULL;
     }
 
@@ -62,8 +72,7 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
     W = malloc(N * N * sizeof(double));
     tmp_mat = malloc(N * N * sizeof(double));
 
-    if (W == NULL || tmp_mat == NULL) {
-        printf("An Error Has Occurred");
+    if (W == NULL || tmp_mat == NULL || sym_matrix == NULL || ddg_matrix == NULL) {
         free(W); free(tmp_mat);
         return NULL;
     }
@@ -124,48 +133,46 @@ double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, 
     return H;
 }
 
-int main(int argc, char **argv) 
+int print_goal(char* path, goal goal, double* datapoints, double* sym_matrix, double* ddg_matrix, double* norm_matrix)
 {
-    
-    char* goal;
-    char* path;
     int N, d;
-    double* datapoints, *A, *D, *W;
 
-    if(argc != 3) {
-        printf("An Error Has Occurred");
-        return 0;
-    }
-
-    goal = argv[1];
-    path = argv[2];
-
-    printf("goal: %s\n", goal);
-    /* printf("path: %s\n", path); */
-
-    if (get_datapoints_dimensions(path, &N, &d) != 0)
-    {
+    if (get_datapoints_dimensions(path, &N, &d) != 0) {
         return -1;
     }
 
-    /* printf("N: %d\n", N); */
-    /* printf("d: %d\n", d); */
-
     datapoints = get_datapoints(path, N, d);
-    printf("datapoints matrix:\n");
-    print_matrix(datapoints, N, d);
-    A = get_sym_matrix(datapoints, N, d);
-    printf("sym matrix:\n");
-    print_matrix(A, N, N);
-    D = get_ddg_matrix(A, N);
-    printf("ddg matrix:\n");
-    print_matrix(D, N, N);
-    printf("norm matrix:\n");
-    W = get_norm_matrix(A, D, N);
-    print_matrix(W, N, N);
-    free(datapoints);
-    free(A);
-    free(D);
-    free(W);
+    sym_matrix = get_sym_matrix(datapoints, N, d);
+    if (goal == sym) return print_matrix(sym_matrix, N, N);
+    
+    ddg_matrix = get_ddg_matrix(sym_matrix, N);
+    if (goal == ddg) return print_matrix(ddg_matrix, N, N);
+
+    norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
+    if (goal == norm) return print_matrix(norm_matrix, N, N);
+
+    return -1;
+}
+
+int main(int argc, char **argv) 
+{
+    double *datapoints = NULL, *sym_matrix = NULL, *ddg_matrix = NULL, *norm_matrix = NULL;
+    char* path;
+    goal goal;
+
+    if(argc != 3) {
+        printf("An Error Has Occurred");
+        return -1;
+    }
+
+    goal = get_goal_from_arg(argv[1]);
+    path = argv[2];
+
+    if (print_goal(path, goal, datapoints, sym_matrix, ddg_matrix, norm_matrix) != 0) {
+        printf("An Error Has Occurred");
+    }
+
+    free(datapoints); free(sym_matrix); free(ddg_matrix); free(norm_matrix);
+
     return 0;
 }
