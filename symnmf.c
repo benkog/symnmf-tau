@@ -31,7 +31,7 @@ double* get_sym_matrix(double* datapoints, int N, int d)
             if (i == j) {
                 A[i * N + j] = 0;
             } else {
-                euc_distance = get_euc_distance((datapoints + i * d), (datapoints + j * d), d);
+                euc_distance = get_sqrd_euc_distance((datapoints + i * d), (datapoints + j * d), d);
                 sym_value = exp(-0.5 * euc_distance);
                 A[i * N + j] = sym_value;
                 A[j * N + i] = sym_value;
@@ -89,7 +89,7 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
     return W;
 }
 
-double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, int k)
+double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, int k, int max_iter, double eps)
 {   
     /*
     * H         - initial H matrix (copied from argument to avoid side-effects)
@@ -100,8 +100,8 @@ double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, 
     * HH_TH     - H * (H transpoed) * H
     * WH        - W * H
     */
-    double *H, *H_next, *H_T, *HH_T, *HH_TH, *WH, *tmp, *W = norm_matrix, beta = 0.5, eps = 1e-4;
-    int i, j, index, max_iter = 300, curr_iter = 0;
+    double *H, *H_next, *H_T, *HH_T, *HH_TH, *WH, *tmp, *W = norm_matrix, beta = 0.5;
+    int i, j, index, curr_iter = 0;
 
     H = malloc(N * k * sizeof(double));
     H_next = malloc(N * k * sizeof(double));
@@ -176,14 +176,14 @@ double* norm(double* datapoints, int N, int d)
     return norm_matrix;
 }
 
-double* symnmf(double* datapoints, double* H, int N, int d, int k)
+double* symnmf(double* datapoints, double* H, int N, int d, int k, int max_iter, double eps)
 {
     double *sym_matrix, *ddg_matrix, *norm_matrix, *symnmf_matrix;
 
     sym_matrix = get_sym_matrix(datapoints, N, d);
     ddg_matrix = get_ddg_matrix(sym_matrix, N);
     norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
-    symnmf_matrix = get_symnmf_matrix(H, norm_matrix, N, k);
+    symnmf_matrix = get_symnmf_matrix(H, norm_matrix, N, k, max_iter, eps);
 
     free(sym_matrix); free(ddg_matrix); free(norm_matrix);
     return symnmf_matrix;
@@ -251,6 +251,5 @@ int main(int argc, char **argv)
     }
 
     free(datapoints);
-
     return 0;
 }

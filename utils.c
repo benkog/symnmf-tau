@@ -90,7 +90,7 @@ int print_matrix(double* mat, int rows, int cols)
     return 0;
 }
 
-double get_euc_distance(double* vec1, double* vec2, int d)
+double get_sqrd_euc_distance(double* vec1, double* vec2, int d)
 {
     int i;
     double distance = 0, diff;
@@ -152,14 +152,5 @@ void transpose_mat(double* mat, double* target, int rows, int cols)
         for (j = 0; j < cols; ++j) {
             target[j * rows + i] = mat[i * cols + j];
         }
-    }
-}
-
-void free_double_pointer_array(double *pointers[], int count)
-{
-    int i;
-
-    for (i = 0; i < count; i++) {
-        free(pointers[i]);
     }
 }
