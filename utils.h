@@ -3,6 +3,7 @@
 
 int get_datapoints_dimensions(char* path, int* N, int* d);
 double* get_datapoints(char* path, int N, int d);
-void print_matrix(double* mat, int n, int d);
+void print_matrix(double* mat, int rows, int cols);
+double get_euc_distance(double* vec1, double* vec2, int d);
 
 #endif

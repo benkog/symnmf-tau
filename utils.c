@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "util.h"
 
 int get_datapoints_dimensions(char* path, int* N, int* d)
@@ -70,17 +71,30 @@ double* get_datapoints(char* path, int N, int d)
     return datapoints;
 }
 
-void print_matrix(double* mat, int N, int d)
+void print_matrix(double* mat, int rows, int cols)
 {
     int i, j;
 
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < d; j++) {
-            printf("%.4f", mat[i * d + j]);
-            if (j < d - 1) {
+    for (i = 0; i < rows; i++) {
+        for (j = 0; j < cols; j++) {
+            printf("%.4f", mat[i * cols + j]);
+            if (j < cols - 1) {
                 printf(",");
             }
         }
         printf("\n");
     }
+}
+
+double get_euc_distance(double* vec1, double* vec2, int d)
+{
+    int i;
+    double distance = 0, diff;
+
+    for (i = 0; i < d; i++) {
+        diff = vec1[i] - vec2[i];
+        distance += diff * diff;
+    }
+
+    return distance;
 }
