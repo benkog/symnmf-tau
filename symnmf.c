@@ -4,14 +4,14 @@
 #include <string.h>
 #include "utils.h"
 
-typedef enum { sym, ddg, norm, invalid } goal;
+typedef enum { sym_a, ddg_a, norm_a, invalid_a } goal;
 
 goal get_goal_from_arg(char* arg)
 {
-    if (strcmp(arg, "sym") == 0) return sym;
-    if (strcmp(arg, "ddg") == 0) return ddg;
-    if (strcmp(arg, "norm") == 0) return norm;
-    return invalid;
+    if (strcmp(arg, "sym") == 0) return sym_a;
+    if (strcmp(arg, "ddg") == 0) return ddg_a;
+    if (strcmp(arg, "norm") == 0) return norm_a;
+    return invalid_a;
 }
 
 double* get_sym_matrix(double* datapoints, int N, int d)
@@ -143,15 +143,88 @@ int print_goal(char* path, goal goal, double* datapoints, double* sym_matrix, do
 
     datapoints = get_datapoints(path, N, d);
     sym_matrix = get_sym_matrix(datapoints, N, d);
-    if (goal == sym) return print_matrix(sym_matrix, N, N);
+    if (goal == sym_a) return print_matrix(sym_matrix, N, N);
     
     ddg_matrix = get_ddg_matrix(sym_matrix, N);
-    if (goal == ddg) return print_matrix(ddg_matrix, N, N);
+    if (goal == ddg_a) return print_matrix(ddg_matrix, N, N);
 
     norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
-    if (goal == norm) return print_matrix(norm_matrix, N, N);
+    if (goal == norm_a) return print_matrix(norm_matrix, N, N);
 
     return -1;
+}
+
+double* sym(char* path, int* N)
+{
+    int *d;
+    double *datapoints, *sym_matrix;
+
+    if (get_datapoints_dimensions(path, N, d) != 0) {
+        return NULL;
+    }
+
+    datapoints = get_datapoints(path, *N, *d);
+    sym_matrix = get_sym_matrix(datapoints, *N, *d);
+    free(datapoints);
+
+    return sym_matrix;
+}
+
+double* ddg(char* path, int* N)
+{
+    double *sym_matrix, *ddg_matrix;
+
+    sym_matrix = sym(path, N);
+    ddg_matrix = get_ddg_matrix(sym_matrix, *N);
+
+    free(sym_matrix);
+    return ddg_matrix;
+}
+
+double* norm(char* path, int* N)
+{
+    double *sym_matrix, *ddg_matrix, *norm_matrix;
+
+    sym_matrix = sym(path, N);
+    ddg_matrix = get_ddg_matrix(sym_matrix, *N);
+    norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, *N);
+
+    free(sym_matrix); free(ddg_matrix);
+    return norm_matrix;
+}
+
+int print_matrix_by_func(double* (*func)(char*, int*), char* path)
+{
+    int status, *N;
+    double* matrix;
+
+    matrix = func(path, N);
+    status = print_matrix(matrix, *N, *N);
+    free(matrix);
+
+    return status;
+}
+
+int pg(char* path, goal goal)
+{
+    int status;
+
+    status = -1;
+
+    switch (goal)
+    {
+        case sym_a:
+            status = print_matrix_by_func(sym, path);
+            break;
+        case ddg_a:
+            status = print_matrix_by_func(ddg, path);
+            break;
+        case norm_a:
+            status = print_matrix_by_func(norm, path);
+            break;
+    }
+
+    return status;
 }
 
 int main(int argc, char **argv) 
