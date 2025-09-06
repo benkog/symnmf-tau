@@ -111,12 +111,12 @@ int main(int argc, char **argv)
     printf("datapoints matrix:\n");
     print_matrix(datapoints, N, d);
     A = get_sym_matrix(datapoints, N, d);
-    printf("A matrix:\n");
+    printf("sym matrix:\n");
     print_matrix(A, N, N);
     D = get_ddg_matrix(A, N);
-    printf("D matrix:\n");
+    printf("ddg matrix:\n");
     print_matrix(D, N, N);
-    printf("D matrix:\n");
+    printf("norm matrix:\n");
     W = get_norm_matrix(A, D, N);
     print_matrix(W, N, N);
     free(datapoints);

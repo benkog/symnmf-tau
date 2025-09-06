@@ -108,24 +108,29 @@ void diag_matrix_pow(double* mat, int N, double exp)
     }
 }
 
-double* mult_sqr_mats(double* mat1, double* mat2, int N)
+double* mult_mats(double* mat1, double* mat2, int mat1_rows, int mat1_cols, int mat2_cols)
 {
     int i, j, k;
     double *res; /* The result of the matrix multiplication */
 
-    res = calloc(N * N, sizeof(double));
+    res = calloc(mat1_rows * mat2_cols, sizeof(double));
     if (res == NULL) {
         printf("An Error Has Occurred");
         return NULL;
     }
 
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++) {
-            for (k = 0; k < N; k++) {
-                res[i * N + j] += mat1[i * N + k] * mat2[k * N + j];
+    for (i = 0; i < mat1_rows; i++) {
+        for (j = 0; j < mat2_cols; j++) {
+            for (k = 0; k < mat1_cols; k++) {
+                res[i * mat2_cols + j] += mat1[i * mat1_cols + k] * mat2[k * mat2_cols + j];
             }
         }
     }
 
     return res;
+}
+
+double* mult_sqr_mats(double* mat1, double* mat2, int N)
+{
+    return mult_mats(mat1, mat2, N, N, N);
 }

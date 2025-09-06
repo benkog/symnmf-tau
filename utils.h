@@ -7,5 +7,6 @@ void print_matrix(double* mat, int rows, int cols);
 double get_euc_distance(double* vec1, double* vec2, int d);
 void diag_matrix_pow(double* mat, int N, double exp);
 double* mult_sqr_mats(double* mat1, double* mat2, int N);
+double* mult_mats(double* mat1, double* mat2, int mat1_rows, int mat1_cols, int mat2_cols)
 
 #endif
