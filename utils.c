@@ -35,7 +35,7 @@ int get_datapoints_dimensions(char* path, int* N, int* d)
         last_char = curr_char;
     }
 
-    /* If the file does not end on a new line, then we did not count the last row. */
+    /* If the file does not end on a new line, then we did not count the last row */
     *N = (last_char == '\n') ? num_of_rows : (num_of_rows + 1);
 
     fclose(file);
@@ -62,7 +62,7 @@ double* get_datapoints(char* path, int N, int d)
     for (i = 0; i < N; i++) {
         for (j = 0; j < d; j++) {
             fscanf(file, "%lf", &datapoints[i * d + j]); 
-            fgetc(file);    /* Move one char forward, could be a comma or a new line */
+            fgetc(file);    /* Skip one char, could be a comma or a new line */
         }
     }
 

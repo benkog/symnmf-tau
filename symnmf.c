@@ -4,7 +4,7 @@
 #include <string.h>
 #include "utils.h"
 
-typedef enum { sym_a, ddg_a, norm_a, invalid_a } goal;
+typedef enum { sym_a, ddg_a, norm_a, invalid_a } goal; /* a suffix stands for argument */
 
 goal get_goal_from_arg(char* arg)
 {
@@ -12,34 +12,6 @@ goal get_goal_from_arg(char* arg)
     if (strcmp(arg, "ddg") == 0) return ddg_a;
     if (strcmp(arg, "norm") == 0) return norm_a;
     return invalid_a;
-}
-
-double* get_sym_matrix(double* datapoints, int N, int d)
-{
-    int i, j;
-    double euc_distance, sym_value;
-    double *A; /* The similarity matrix to be calculated */
-
-    A = malloc(N * N * sizeof(double));
-    if (A == NULL || datapoints == NULL) {
-        free(A);
-        return NULL;
-    }
-
-    for (i = 0; i < N; i++) {
-        for (j = i; j < N; j++) {
-            if (i == j) {
-                A[i * N + j] = 0;
-            } else {
-                euc_distance = get_sqrd_euc_distance((datapoints + i * d), (datapoints + j * d), d);
-                sym_value = exp(-0.5 * euc_distance);
-                A[i * N + j] = sym_value;
-                A[j * N + i] = sym_value;
-            }   
-        }
-    }
-
-    return A;
 }
 
 double* get_ddg_matrix(double* sym_matrix, int N)
@@ -98,7 +70,7 @@ double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, 
     H_next = malloc(N * k * sizeof(double));    /* stores the result of current iteration */
     H_T = malloc(N * k * sizeof(double));       /* H transposed */
     HH_T = malloc(N * N * sizeof(double));      /* (H transposed) * H */
-    HH_TH = malloc(N * k * sizeof(double));     /* H * (H transpoed) * H*/
+    HH_TH = malloc(N * k * sizeof(double));     /* H * (H transpoed) * H */
     WH = malloc(N * k * sizeof(double));        /* W * H , W is the normalized similarity matrix*/
 
     if (H == NULL || H_next == NULL || H_T == NULL || HH_T == NULL || HH_TH == NULL || WH == NULL || initial_H_matrix == NULL || norm_matrix == NULL) {
@@ -137,18 +109,37 @@ double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, 
 
 double* sym(double* datapoints, int N, int d)
 {
-    double *sym_matrix;
+    int i, j;
+    double euc_distance, sym_value;
+    double *A; /* The similarity matrix to be calculated */
 
-    sym_matrix = get_sym_matrix(datapoints, N, d);
+    A = malloc(N * N * sizeof(double));
+    if (A == NULL || datapoints == NULL) {
+        free(A);
+        return NULL;
+    }
 
-    return sym_matrix;
+    for (i = 0; i < N; i++) {
+        for (j = i; j < N; j++) {
+            if (i == j) {
+                A[i * N + j] = 0;
+            } else {
+                euc_distance = get_sqrd_euc_distance((datapoints + i * d), (datapoints + j * d), d);
+                sym_value = exp(-0.5 * euc_distance);
+                A[i * N + j] = sym_value;
+                A[j * N + i] = sym_value;
+            }   
+        }
+    }
+
+    return A;
 }
 
 double* ddg(double* datapoints, int N, int d)
 {
     double *sym_matrix, *ddg_matrix;
 
-    sym_matrix = get_sym_matrix(datapoints, N, d);
+    sym_matrix = sym(datapoints, N, d);
     ddg_matrix = get_ddg_matrix(sym_matrix, N);
 
     free(sym_matrix);
@@ -159,7 +150,7 @@ double* norm(double* datapoints, int N, int d)
 {
     double *sym_matrix, *ddg_matrix, *norm_matrix;
 
-    sym_matrix = get_sym_matrix(datapoints, N, d);
+    sym_matrix = sym(datapoints, N, d);
     ddg_matrix = get_ddg_matrix(sym_matrix, N);
     norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
 
@@ -167,14 +158,15 @@ double* norm(double* datapoints, int N, int d)
     return norm_matrix;
 }
 
+/* Calculate the result of one of the following functions: sym, ddg, norm and then print the result */
 int print_matrix_from_func(double* (*func)(double*, int, int), double* datapoints, int N, int d)
 {
     int status;
-    double* matrix;
+    double* result_matrix;
 
-    matrix = func(datapoints, N, d);
-    status = print_matrix(matrix, N, N);
-    free(matrix);
+    result_matrix = func(datapoints, N, d);
+    status = print_matrix(result_matrix, N, N); /* The result of sym, ddg, or norm is of size (N * N) */
+    free(result_matrix);
 
     return status;
 }

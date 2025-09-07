@@ -83,9 +83,9 @@ PyObject* get_pylist_matrix_by_func(PyObject* args, double* (*func)(double*, int
     }
 
     datapoints = get_array_from_pylist_matrix(datapoints_pylist, N, d);
-    matrix = func(datapoints, N, d);
+    matrix = func(datapoints, N, d); 
 
-    pylist_matrix = get_pylist_matrix_from_array(matrix, N, N);
+    pylist_matrix = get_pylist_matrix_from_array(matrix, N, N); /* The result of sym, ddg or norm is a matrix of size (N * N) */
 
     free(datapoints);
     free(matrix);
