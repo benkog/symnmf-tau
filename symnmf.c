@@ -20,7 +20,7 @@ double* get_ddg_matrix(double* sym_matrix, int N)
     double edge_sum = 0;
     double *D; /* The diagonal degree matrix to be calculated */
 
-    D = malloc(N * N * sizeof(double));
+    D = calloc(N * N, sizeof(double));
     if (D == NULL || sym_matrix == NULL) {
         free(D);
         return NULL;

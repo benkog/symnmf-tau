@@ -6,3 +6,5 @@ tests
 symnmfmodule.cpython-311-darwin.so
 build
 __pycache__
+test
+run_tests.sh

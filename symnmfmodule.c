@@ -28,7 +28,7 @@ static double* get_array_from_pylist_matrix(PyObject* pylist, int rows, int cols
 {
     int i, j;
     double *arr;
-    PyObject *row;
+    PyObject *row, *item;
 
     if (!PyList_Check(pylist)) {
         return NULL;
@@ -46,7 +46,12 @@ static double* get_array_from_pylist_matrix(PyObject* pylist, int rows, int cols
             return NULL;
         }
         for (j = 0; j < cols; j++) {
-            arr[i * cols + j] = PyFloat_AsDouble(PyList_GetItem(row, j));
+            item = PyList_GetItem(row, j);
+            if (!PyFloat_Check(item)) {
+                free(arr);
+                return NULL;
+            }
+            arr[i * cols + j] = PyFloat_AsDouble(item);
         }
     }
 
@@ -89,8 +94,8 @@ static PyObject* get_pylist_matrix_by_func(PyObject* args, double* (*func)(doubl
     }
 
     datapoints = get_array_from_pylist_matrix(datapoints_pylist, N, d);
-    matrix = func(datapoints, N, d); 
-
+    matrix = func(datapoints, N, d);
+    
     pylist_matrix = get_pylist_matrix_from_array(matrix, N, N); /* The result of sym, ddg or norm is a matrix of size (N * N) */
 
     free(datapoints);
