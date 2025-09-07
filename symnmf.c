@@ -119,7 +119,7 @@ double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, 
         for (i = 0; i < N; i++) {
             for (j = 0; j < k; j++) {
                 index = i * k + j;
-                H_next[index] = H[index] * (1 - beta + beta * (WH[index] / ((HH_TH == 0) ? 1e-6 : HH_TH[index])));
+                H_next[index] = H[index] * (1 - beta + beta * (WH[index] / ((HH_TH[index] == 0) ? 1e-6 : HH_TH[index])));
             }
         }
 
@@ -128,6 +128,7 @@ double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, 
         tmp = H;
         H = H_next;
         H_next = tmp;
+        curr_iter++;
     } while (curr_iter < max_iter && frobenius_norm_sqr_diff(H, H_next, N, k) >= eps);
     
     free(H_next); free(H_T); free(HH_T); free(HH_TH); free(WH);
