@@ -27,6 +27,10 @@ double* get_array_from_pylist_matrix(PyObject* pylist, int rows, int cols)
     double *arr;
     PyObject *row;
 
+    if (!PyList_Check(pylist)) {
+        return NULL;
+    }
+
     arr = malloc(rows * cols * sizeof(double));
     if (arr == NULL) {
         return NULL;
@@ -34,6 +38,10 @@ double* get_array_from_pylist_matrix(PyObject* pylist, int rows, int cols)
 
     for (i = 0; i < rows; i++) {
         row = PyList_GetItem(pylist, i);
+        if (!PyList_Check(row)) {
+            free(arr);
+            return NULL;
+        }
         for (j = 0; j < cols; j++) {
             arr[i * cols + j] = PyFloat_AsDouble(PyList_GetItem(row, j));
         }

@@ -5,7 +5,7 @@ import symnmfmodule
 def get_initial_H(W, k):
     np.random.seed(1234)
     m = np.mean(W)
-    return np.random.uniform(0, 2 * np.sqrt(m / k), size=(len(W), k))
+    return np.random.uniform(0, 2 * np.sqrt(m / k), size=(len(W), k)).tolist()
 
 # symnmfmodule.symnmf(H, W, len(X), k, 300, 1e-4)
 
@@ -18,11 +18,7 @@ def get_matrix_by_goal(goal, X, k):
         return symnmfmodule.norm(X)
     elif goal == 'symnmf':
         W = symnmfmodule.norm(X)
-        for vector in W:
-            print(','.join(f'{element:.4f}' for element in vector))
         H = get_initial_H(W, k)
-        for vector in H:
-            print(','.join(f'{element:.4f}' for element in vector))
         return symnmfmodule.symnmf(H, W, len(X), k, 300, 1e-4)
     return X
 
