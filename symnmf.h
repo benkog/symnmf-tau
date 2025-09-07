@@ -59,4 +59,6 @@ double* norm(double* datapoints, int N, int d);
  */
 double* symnmf(double* datapoints, double* H, int N, int d, int k, int max_iter, double eps);
 
+double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, int k, int max_iter, double eps);
+
 #endif

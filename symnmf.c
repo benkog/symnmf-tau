@@ -89,7 +89,7 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
     return W;
 }
 
-double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, int k, int max_iter, double eps)
+double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, int k, int max_iter, double eps)
 {   
     double *H, *H_next, *H_T, *HH_T, *HH_TH, *WH, *tmp, *W = norm_matrix, beta = 0.5;
     int i, j, index, curr_iter = 0;
@@ -164,19 +164,6 @@ double* norm(double* datapoints, int N, int d)
 
     free(sym_matrix); free(ddg_matrix);
     return norm_matrix;
-}
-
-double* symnmf(double* datapoints, double* H, int N, int d, int k, int max_iter, double eps)
-{
-    double *sym_matrix, *ddg_matrix, *norm_matrix, *symnmf_matrix;
-
-    sym_matrix = get_sym_matrix(datapoints, N, d);
-    ddg_matrix = get_ddg_matrix(sym_matrix, N);
-    norm_matrix = get_norm_matrix(sym_matrix, ddg_matrix, N);
-    symnmf_matrix = get_symnmf_matrix(H, norm_matrix, N, k, max_iter, eps);
-
-    free(sym_matrix); free(ddg_matrix); free(norm_matrix);
-    return symnmf_matrix;
 }
 
 int print_matrix_from_func(double* (*func)(double*, int, int), double* datapoints, int N, int d)
