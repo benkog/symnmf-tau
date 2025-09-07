@@ -2,6 +2,9 @@ import sys
 import numpy as np
 import symnmfmodule
 
+max_iter = 300
+eps = 1e-4
+
 def get_initial_H(W, k):
     np.random.seed(1234)
     m = np.mean(W)
@@ -17,8 +20,8 @@ def get_matrix_by_goal(goal, X, k):
     elif goal == 'symnmf':
         W = symnmfmodule.norm(X)
         H = get_initial_H(W, k)
-        return symnmfmodule.symnmf(H, W, len(X), k, 300, 1e-4) # The default max_iter is 300 and default epsilon is 1e-4
-    raise Exception # If the goal is invalid
+        return symnmfmodule.symnmf(H, W, len(X), k, max_iter, eps) 
+    raise Exception # If the goal is invalid throw an exeption
 
 def main():
     if len(sys.argv) != 4:
