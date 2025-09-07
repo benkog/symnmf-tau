@@ -12,11 +12,10 @@ int get_datapoints_dimensions(char* path, int* N, int* d)
     file = fopen(path, "r");
 
     if (!file) {
-        printf("An Error Has Occurred");
         return -1;
     }
 
-    while ((curr_char = fgetc(file)) != EOF) {
+    while ((curr_char = fgetc(file)) != EOF) { /* Count number of commas in a row */
         if (curr_char == ',') {
             num_of_commas++;
         } else if (curr_char == '\n') {
@@ -24,18 +23,19 @@ int get_datapoints_dimensions(char* path, int* N, int* d)
         }
     }
 
-    *d = num_of_commas + 1;
-
+    /* The number of elements in each rows is the number of commas in a row + 1 */
+    *d = num_of_commas + 1; 
+                                            
     fseek(file, 0, SEEK_SET);
 
-    while ((curr_char = fgetc(file)) != EOF) {
+    while ((curr_char = fgetc(file)) != EOF) { /* count number of new lines */
         if (curr_char == '\n') {
             num_of_rows++;
         } 
         last_char = curr_char;
     }
 
-    /* If the file does not end on a new line, then we forgot to count that row. */
+    /* If the file does not end on a new line, then we did not count the last row. */
     *N = (last_char == '\n') ? num_of_rows : (num_of_rows + 1);
 
     fclose(file);
@@ -61,8 +61,8 @@ double* get_datapoints(char* path, int N, int d)
 
     for (i = 0; i < N; i++) {
         for (j = 0; j < d; j++) {
-            fscanf(file, "%lf", &datapoints[i * d + j]);
-            fgetc(file);
+            fscanf(file, "%lf", &datapoints[i * d + j]); 
+            fgetc(file);    /* Move one char forward, could be a comma or a new line */
         }
     }
 
@@ -118,7 +118,7 @@ void mult_mats(double* mat1, double* mat2, double* target, int mat1_rows, int ma
 
     for (i = 0; i < mat1_rows; i++) {
         for (j = 0; j < mat2_cols; j++) {
-            target[i * mat2_cols + j] = 0.0;
+            target[i * mat2_cols + j] = 0.0; /* Reset element i,j to zero, in case there was something there before or its uninitialized */
             for (k = 0; k < mat1_cols; k++) {
                 target[i * mat2_cols + j] += mat1[i * mat1_cols + k] * mat2[k * mat2_cols + j];
             }

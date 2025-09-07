@@ -91,24 +91,15 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
 
 double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, int k, int max_iter, double eps)
 {   
-    /*
-    * H         - initial H matrix (copied from argument to avoid side-effects)
-    * H_next    - stores the result of current iteration
-    * H_T       - H transposed
-    * W         - normalized similarity matrix
-    * HH_T      - (H transposed) * H
-    * HH_TH     - H * (H transpoed) * H
-    * WH        - W * H
-    */
     double *H, *H_next, *H_T, *HH_T, *HH_TH, *WH, *tmp, *W = norm_matrix, beta = 0.5;
     int i, j, index, curr_iter = 0;
 
-    H = malloc(N * k * sizeof(double));
-    H_next = malloc(N * k * sizeof(double));
-    H_T = malloc(N * k * sizeof(double));
-    HH_T = malloc(N * N * sizeof(double));
-    HH_TH = malloc(N * k * sizeof(double));
-    WH = malloc(N * k * sizeof(double));
+    H = malloc(N * k * sizeof(double));         /* copy of initial H matrix to avoid side effects */
+    H_next = malloc(N * k * sizeof(double));    /* stores the result of current iteration */
+    H_T = malloc(N * k * sizeof(double));       /* H transposed */
+    HH_T = malloc(N * N * sizeof(double));      /* (H transposed) * H */
+    HH_TH = malloc(N * k * sizeof(double));     /* H * (H transpoed) * H*/
+    WH = malloc(N * k * sizeof(double));        /* W * H , W is the normalized similarity matrix*/
 
     if (H == NULL || H_next == NULL || H_T == NULL || HH_T == NULL || HH_TH == NULL || WH == NULL || initial_H_matrix == NULL || norm_matrix == NULL) {
         free(H); free(H_next); free(H_T); free(HH_T); free(HH_TH); free(WH);
@@ -137,7 +128,6 @@ double* get_symnmf_matrix(double* initial_H_matrix, double* norm_matrix, int N, 
         tmp = H;
         H = H_next;
         H_next = tmp;
-
     } while (curr_iter < max_iter && frobenius_norm_sqr_diff(H, H_next, N, k) >= eps);
     
     free(H_next); free(H_T); free(HH_T); free(HH_TH); free(WH);
@@ -217,7 +207,6 @@ int print_goal_matrix(goal goal, double* datapoints, int N, int d)
             status = print_matrix_from_func(norm, datapoints, N, d);
             break;
         default:
-            status = -1;
             break;
     }
 
