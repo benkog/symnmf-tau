@@ -5,3 +5,4 @@ tests
 .vscode
 symnmfmodule.cpython-311-darwin.so
 build
+__pycache__
