@@ -1,5 +1,24 @@
 import sys
 import numpy as np
+import symnmfmodule
+
+def get_initial_H(W, k):
+    np.random.seed(1234)
+    m = np.mean(W)
+    return np.random.uniform(0, 2 * np.sqrt(m / k), size=(W.shape[0], k))
+
+def get_matrix_by_goal(goal, X, k):
+    if goal == 'sym':
+        return symnmfmodule.sym(X)
+    elif goal == 'ddg':
+        return symnmfmodule.ddg(X)
+    elif goal == 'norm':
+        return symnmfmodule.norm(X)
+    elif goal == 'symnmf':
+        W = symnmfmodule.norm(X)
+        H = get_initial_H(W, k)
+        return symnmfmodule.symnmf(H, W, X.shape[0], k, 300, 1e-4)
+    return X
 
 def main():
     if len(sys.argv) != 4:
@@ -16,16 +35,21 @@ def main():
         print("An Error Has Occurred")
         return
 
-    print(f"k = {k}")
-    print(f"goal = {goal}")
-    print(f"path = {path}")
-
     try:
-        # Try to load the CSV file using NumPy
-        data = np.loadtxt(path, delimiter=",")
-        print(data)
+        X = np.loadtxt(path, delimiter=",")
     except Exception:
         print("An Error Has Occurred")
+        return
+    
+    try:
+        res = get_matrix_by_goal(goal, X.tolist(), k)
+    except SystemError:
+        print("An Error Has Occurred")
+        return
+
+    for vector in res:
+        print(','.join(f'{element:.4f}' for element in vector))
+    
 
 if __name__ == "__main__":
     main()

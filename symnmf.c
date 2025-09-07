@@ -194,6 +194,7 @@ int print_goal_matrix(goal goal, double* datapoints, int N, int d)
             status = print_matrix_from_func(norm, datapoints, N, d);
             break;
         default:
+            status = -1;
             break;
     }
 

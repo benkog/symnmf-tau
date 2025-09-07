@@ -24,12 +24,12 @@ static PyObject* symnmf_symnmf(PyObject *self, PyObject *args)
     double *H, *W, *symnmf_result ,eps;
     PyObject *H_pylist, *W_pylist, *symnmf_result_pylist;
 
-    if(!PyArg_ParseTuple(args, "OOiiid", &H, &W, &N, &k, &max_iter, &eps)) {
+    if(!PyArg_ParseTuple(args, "OOiiid", &H_pylist, &W_pylist, &N, &k, &max_iter, &eps)) {
         return NULL; 
     }
 
-    H = get_array_from_pylist_matrix(H, N, k);
-    W = get_array_from_pylist_matrix(W, N, N);
+    H = get_array_from_pylist_matrix(H_pylist, N, k);
+    W = get_array_from_pylist_matrix(W_pylist, N, N);
     symnmf_result = get_symnmf_result(H, W, N, k, max_iter, eps);
 
     symnmf_result_pylist = get_pylist_matrix_from_array(symnmf_result, N, k);

@@ -41,24 +41,6 @@ double* ddg(double* datapoints, int N, int d);
  */
 double* norm(double* datapoints, int N, int d);
 
-/**
- * @brief Performs the SymNMF algorithm.
- *
- * @param datapoints Pointer to the input data array of size N × d.
- * @param H Pointer to the initial nonnegative factor matrix of size N × k.
- * @param N Number of data points.
- * @param d Dimension of each data point.
- * @param k Target rank for the factorization.
- * @param max_iter Maximum number of iterations for the optimization algorithm.
- * @param eps Convergence threshold for stopping criterion based on relative Frobenius norm change.
- *
- * @return Pointer to the final nonnegative factor matrix H of size N × k.
- *         Returns NULL on failure.
- *
- * @note The returned matrix is dynamically allocated; the caller must free it.
- */
-double* symnmf(double* datapoints, double* H, int N, int d, int k, int max_iter, double eps);
-
 double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, int k, int max_iter, double eps);
 
 #endif
