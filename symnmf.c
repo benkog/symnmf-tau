@@ -82,8 +82,8 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
     memcpy(ddg_matrix_cpy, ddg_matrix, N * N * sizeof(double)); /* Making a copy to not cause side-effects */
 
     diag_matrix_pow(ddg_matrix_cpy, N, -0.5); 
-    mult_sqr_mats(ddg_matrix, sym_matrix, tmp_mat, N); 
-    mult_sqr_mats(tmp_mat, ddg_matrix, W, N); 
+    mult_sqr_mats(ddg_matrix_cpy, sym_matrix, tmp_mat, N); 
+    mult_sqr_mats(tmp_mat, ddg_matrix_cpy, W, N); 
 
     free(tmp_mat);
     return W;
