@@ -7,8 +7,6 @@ def get_initial_H(W, k):
     m = np.mean(W)
     return np.random.uniform(0, 2 * np.sqrt(m / k), size=(len(W), k)).tolist()
 
-# symnmfmodule.symnmf(H, W, len(X), k, 300, 1e-4)
-
 def get_matrix_by_goal(goal, X, k):
     if goal == 'sym':
         return symnmfmodule.sym(X)
@@ -19,39 +17,23 @@ def get_matrix_by_goal(goal, X, k):
     elif goal == 'symnmf':
         W = symnmfmodule.norm(X)
         H = get_initial_H(W, k)
-        return symnmfmodule.symnmf(H, W, len(X), k, 300, 1e-4)
-    return X
+        return symnmfmodule.symnmf(H, W, len(X), k, 300, 1e-4) # The default max_iter is 300 and default epsilon is 1e-4
+    raise Exception # If the goal is invalid
 
 def main():
     if len(sys.argv) != 4:
         print("An Error Has Occurred")
         return
 
-    k_arg = sys.argv[1]
-    goal = sys.argv[2]
-    path = sys.argv[3]
-
     try:
-        k = int(k_arg)
-    except ValueError:
-        print("An Error Has Occurred")
-        return
-
-    try:
-        X = np.loadtxt(path, delimiter=",")
+        k = int(sys.argv[1])
+        goal = sys.argv[2]
+        X = np.loadtxt(sys.argv[3], delimiter=",").tolist()
+        res = get_matrix_by_goal(goal, X, k)
+        for row in res:
+            print(','.join(f'{x:.4f}' for x in row))
     except Exception:
-        print("An Error Has Occurred")
-        return
-    
-    try:
-        res = get_matrix_by_goal(goal, X.tolist(), k)
-    except SystemError:
-        print("An Error Has Occurred")
-        return
-
-    for vector in res:
-        print(','.join(f'{element:.4f}' for element in vector))
-    
+        print("An Error Has Occurred")    
 
 if __name__ == "__main__":
     main()
