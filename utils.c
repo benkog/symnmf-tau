@@ -6,8 +6,8 @@
 int get_datapoints_dimensions(char* path, int* N, int* d)
 {
     FILE *file;
-    int num_of_commas = 0, num_of_rows = 0, last_char;
-    int curr_char;
+    int num_of_commas = 0, num_of_rows = 0, curr_char;
+    int last_char = '\n'; /* Default value in case of empty file */
 
     file = fopen(path, "r");
 
