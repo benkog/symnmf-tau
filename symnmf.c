@@ -4,6 +4,8 @@
 #include <string.h>
 #include "utils.h"
 
+#define BETA 0.5
+
 typedef enum { sym_a, ddg_a, norm_a, invalid_a } goal; /* a suffix stands for argument */
 
 goal get_goal_from_arg(char* arg)
@@ -63,7 +65,7 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
 
 double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, int k, int max_iter, double eps)
 {   
-    double *H, *H_next, *H_T, *HH_T, *HH_TH, *WH, *tmp, *W = norm_matrix, beta = 0.5;
+    double *H, *H_next, *H_T, *HH_T, *HH_TH, *WH, *tmp, *W = norm_matrix;
     int i, j, index, curr_iter = 0;
 
     H = malloc(N * k * sizeof(double));         /* copy of initial H matrix to avoid side effects */
@@ -91,7 +93,7 @@ double* get_symnmf_result(double* initial_H_matrix, double* norm_matrix, int N, 
         for (i = 0; i < N; i++) {
             for (j = 0; j < k; j++) {
                 index = i * k + j;
-                H_next[index] = H[index] * (1 - beta + beta * (WH[index] / ((HH_TH[index] == 0) ? 1e-6 : HH_TH[index])));
+                H_next[index] = H[index] * (1 - BETA + BETA * (WH[index] / ((HH_TH[index] == 0) ? 1e-6 : HH_TH[index])));
             }
         }
 
