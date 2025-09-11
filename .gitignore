@@ -9,3 +9,4 @@ __pycache__
 test
 run_tests.sh
 misc
+.gitignore

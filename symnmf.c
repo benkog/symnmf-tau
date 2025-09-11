@@ -158,7 +158,7 @@ double* norm(double* datapoints, int N, int d)
     return norm_matrix;
 }
 
-/* Calculate the result of one of the following functions: sym, ddg, norm and then print the result */
+/* Calculate the result of one of the following functions: sym, ddg, norm and then print the result, return 0 on success */
 int print_matrix_from_func(double* (*func)(double*, int, int), double* datapoints, int N, int d)
 {
     int status;
@@ -173,25 +173,17 @@ int print_matrix_from_func(double* (*func)(double*, int, int), double* datapoint
 
 int print_goal_matrix(goal goal, double* datapoints, int N, int d)
 {
-    int status;
-
     switch (goal)
     {
         case sym_a:
-            status = print_matrix_from_func(sym, datapoints, N, d);
-            break;
+            return print_matrix_from_func(sym, datapoints, N, d);
         case ddg_a:
-            status = print_matrix_from_func(ddg, datapoints, N, d);
-            break;
+            return print_matrix_from_func(ddg, datapoints, N, d);
         case norm_a:
-            status = print_matrix_from_func(norm, datapoints, N, d);
-            break;
+            return print_matrix_from_func(norm, datapoints, N, d);
         default:
-            status = -1;
-            break;
+            return -1;
     }
-
-    return status;
 }
 
 int main(int argc, char **argv) 
