@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "util.h"
+#include "utils.h"
 
 int get_datapoints_dimensions(char* path, int* N, int* d)
 {
