@@ -66,6 +66,7 @@ double* get_datapoints(char* path, int N, int d)
         }
     }
 
+    fclose(file);
     return datapoints;
 }
 
