@@ -59,7 +59,7 @@ double* get_norm_matrix(double* sym_matrix, double* ddg_matrix, int N)
     mult_sqr_mats(ddg_matrix_cpy, sym_matrix, tmp_mat, N); 
     mult_sqr_mats(tmp_mat, ddg_matrix_cpy, W, N); 
 
-    free(tmp_mat);
+    free(tmp_mat); free(ddg_matrix_cpy);
     return W;
 }
 
