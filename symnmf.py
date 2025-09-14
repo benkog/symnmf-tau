@@ -31,7 +31,7 @@ def main():
     try:
         k = int(sys.argv[1])
         goal = sys.argv[2]
-        X = np.loadtxt(sys.argv[3], delimiter=",").tolist()
+        X = np.loadtxt(sys.argv[3], delimiter=",", ndmin=2).tolist()
         res = get_matrix_by_goal(goal, X, k)
         for row in res:
             print(','.join(f'{x:.4f}' for x in row))
