@@ -24,7 +24,7 @@ def main():
     
     try:
         k = int(sys.argv[1])
-        X = np.loadtxt(sys.argv[2], delimiter=",").tolist()
+        X = np.loadtxt(sys.argv[2], delimiter=",", ndmin=2).tolist()
         symnmf_score = get_symnmf_score(X, k)
         kmeans_score = get_kmeans_scroe(X, k)
         print(f"nmf: {symnmf_score:.4f}")
